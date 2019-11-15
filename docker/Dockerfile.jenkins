@@ -62,7 +62,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         less \
     && rm -rf /var/lib/apt/lists/* \
     && gem update --system \
-    && gem install fastlane -NV \
+    && gem install fastlane\
     && apt-get purge -y --auto-remove \
         ruby-dev \
         g++ \
