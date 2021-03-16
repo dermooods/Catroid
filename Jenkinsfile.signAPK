@@ -30,7 +30,6 @@ pipeline {
             steps {
                 script {
                     def ret = sh script: "./buildScripts/checkUrlExists.sh '$env.DOWNLOAD'", returnStatus: true
-					sh ''' echo $ret'''
                     if ($ret == 200) {
                         // Handle special error from the script, if the program download was not
                         // possible because of the HTTP error 528, we set the build to UNSTABLE
