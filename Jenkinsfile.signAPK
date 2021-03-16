@@ -50,12 +50,9 @@ pipeline {
 			
 			steps {
                 // Build, zipalign and sign releasable APK
-                withCredentials([file(credentialsId: 'a925b6e8-b3c6-407e-8cad-65886e330037', variable: 'SIGNING_KEYSTORE')]) {
-                    script {  
-						sh "./gradlew clean assembleStandaloneDebug -Papk_generator_enabled=true -Psuffix='$SUFFIX' -Pdownload='$DOWNLOAD'"
-						sh "jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore ${SIGNING_KEYSTORE} ${standaloneApk} alias_name"
-                    }
-                }
+				script {  
+					sh "./gradlew clean assembleStandaloneDebug -Papk_generator_enabled=true -Psuffix='$SUFFIX' -Pdownload='$DOWNLOAD' && jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore ${SIGNING_KEYSTORE} ${standaloneApk} alias_name"
+				}
                 archiveArtifacts artifacts: 'catroid/build/outputs/apk/**/*signedRelease.apk', fingerprint: true
             }
         }
