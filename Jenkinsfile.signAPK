@@ -30,7 +30,7 @@ pipeline {
             steps {
                 script {
                     def ret = sh script: "./buildScripts/checkUrlExists.sh '$env.DOWNLOAD'", returnStatus: true
-                    def ret_keystore = sh script: "./buildScripts/checkUrlExists.sh '$env.DOWNLOAD'", returnStatus: true
+                    def ret_keystore = sh script: "./buildScripts/checkUrlExists.sh '$env.Signing_keystore_url'", returnStatus: true
                     if (ret == 200 || ret_keystore == 200) {
                         // Handle special error from the script, if the program download was not
                         // possible because of the HTTP error 528, we set the build to UNSTABLE
@@ -52,10 +52,10 @@ pipeline {
 			
 			steps {
                 // Build, zipalign and sign releasable APK
-				sh "wget -O /tmp/keystoreFile.keystore '$Signing_keystore_url'"
+				sh "wget -O /tmp/keystoreFile1.keystore '$Signing_keystore_url'"
 				//sh "keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000"
 				//sh "./gradlew clean assembleStandaloneDebug -Papk_generator_enabled=true -Psuffix='standalone' -Pdownload='$DOWNLOAD' && jarsigner -verbose -sigalg RSA -digestalg SHA1 -keystore debug.keystore ${standaloneApk} -storepass android -keypass android -alias androiddebugkey"
-				sh "./gradlew clean assembleStandaloneDebug -Papk_generator_enabled=true -Psuffix='standalone' -Pdownload='$DOWNLOAD' && jarsigner -verbose -sigalg RSA -digestalg SHA1 -keystore /tmp/keystoreFile.keystore ${standaloneApk} -storepass android -keypass android 'key0'"
+				sh "./gradlew clean assembleStandaloneDebug -Papk_generator_enabled=true -Psuffix='standalone' -Pdownload='$DOWNLOAD' && jarsigner -verbose -sigalg RSA -digestalg SHA1 -keystore /tmp/keystoreFile1.keystore ${standaloneApk} -storepass android -keypass android 'key0'"
 				//sh "./gradlew clean assembleStandaloneDebug -Papk_generator_enabled=true -Psuffix='standalone' -Pdownload='$DOWNLOAD' && jarsigner -verbose -sigalg RSA -digestalg SHA1 -keystore /tmp/keystoreFile.keystore ${standaloneApk} -storepass ${signingKeystorePassword} 'key0'"
                 archiveArtifacts artifacts: 'catroid/build/outputs/apk/**/*.apk', fingerprint: true
             }
