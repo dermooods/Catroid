@@ -53,7 +53,7 @@ pipeline {
 			steps {
                 // Build, zipalign and sign releasable APK
 				sh "wget -O /tmp/keystoreFile '$Signing_keystore_url'"
-				sh "keytool -genkey -v -keystore /tmp/keystoreFile -alias keystore_alias -keyalg RSA -keysize 2048 -validity 10000"
+				sh "keytool -genkey -v -keystore /tmp/keystoreFile -alias keystore_alias -keyalg RSA -keysize 2048 -validity 10000 -storepass ${signingKeystorePassword}"
 				sh "./gradlew clean assembleStandaloneDebug -Papk_generator_enabled=true -Psuffix='standalone' -Pdownload='$DOWNLOAD' && jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore /tmp/keystoreFile ${standaloneApk} -storepass ${signingKeystorePassword} 'keystore_alias'"
                 archiveArtifacts artifacts: 'catroid/build/outputs/apk/**/*.apk', fingerprint: true
             }
