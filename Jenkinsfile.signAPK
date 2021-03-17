@@ -40,6 +40,7 @@ pipeline {
                 }
             }
         }
+		
         stage('Build signed APK') {
             // needed, as long as we mark the build unstable when we receive the 528 error from WEB
             when {
@@ -51,7 +52,7 @@ pipeline {
 			steps {
                 // Build, zipalign and sign releasable APK
 				sh "./gradlew clean assembleStandaloneDebug -Papk_generator_enabled=true -Psuffix='standalone' -Pdownload='$DOWNLOAD' && jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore ${SIGNING_KEYSTORE} ${standaloneApk} alias_name"
-                archiveArtifacts artifacts: 'catroid/build/outputs/apk/**/*signedRelease.apk', fingerprint: true
+                archiveArtifacts artifacts: 'catroid/build/outputs/apk/**/*.apk', fingerprint: true
             }
         }
 
