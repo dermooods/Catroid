@@ -30,11 +30,12 @@ pipeline {
             steps {
                 script {
                     def ret = sh script: "./buildScripts/checkUrlExists.sh '$env.DOWNLOAD'", returnStatus: true
-                    if (ret == 200) {
+                    def ret_keystore = sh script: "./buildScripts/checkUrlExists.sh '$env.Signing_keystore_url'", returnStatus: true
+                    if (ret == 200 || ret_keystore == 200) {
                         // Handle special error from the script, if the program download was not
                         // possible because of the HTTP error 528, we set the build to UNSTABLE
                         currentBuild.result = 'UNSTABLE'
-                    } else if (ret != 0) {
+                    } else if (ret != 0 || ret_keystore != 0) {
                         currentBuild.result = 'FAILURE'
                     }
                 }
@@ -51,7 +52,8 @@ pipeline {
 			
 			steps {
                 // Build, zipalign and sign releasable APK
-				sh "./gradlew clean assembleStandaloneDebug -Papk_generator_enabled=true -Psuffix='standalone' -Pdownload='$DOWNLOAD' && jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore a ${standaloneApk} 'alias1'"
+				sh "wget -O /tmp/keystoreFile '$Signing_keystore_url'"
+				sh "./gradlew clean assembleStandaloneDebug -Papk_generator_enabled=true -Psuffix='standalone' -Pdownload='$DOWNLOAD' && jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore /tmp/keystoreFile ${standaloneApk} 'keystore_alias'"
                 archiveArtifacts artifacts: 'catroid/build/outputs/apk/**/*.apk', fingerprint: true
             }
         }
