@@ -52,10 +52,9 @@ pipeline {
 			
 			steps {
                 // Build, zipalign and sign releasable APK
-				//sh "wget -O /tmp/keystoreFile1.keystore '$Signing_keystore_url'"
-				sh "keytool -genkey -v -keystore /tmp/keystoreFile1.keystore -alias ${signingKeyAlias} -keyalg RSA -keysize 2048 -validity 10000 -dname 'CN=cName, OU=orgUnit, O=org, L=city, S=state, C=countryCode' -keypass ${signingKeystorePassword} -storepass ${signingKeystorePassword}"
-
-				sh "./gradlew clean assembleStandaloneDebug -Papk_generator_enabled=true -Psuffix='standalone' -Pdownload='$DOWNLOAD' && jarsigner -verbose -sigalg SHA1withRSA  -digestalg SHA1 -keystore /tmp/keystoreFile1.keystore '${standaloneApk}' -storepass '${signingKeystorePassword}' '${signingKeyAlias}'"
+				//sh "wget -O /tmp/keystoreFile.keystore '$Signing_keystore_url'"
+				sh "keytool -genkey -v -keystore /tmp/keystoreFile.keystore -alias ${signingKeyAlias} -keyalg RSA -keysize 2048 -validity 10000 -dname 'CN=cName, OU=orgUnit, O=org, L=city, S=state, C=countryCode' -keypass ${signingKeystorePassword} -storepass ${signingKeystorePassword}"
+				sh "./gradlew clean assembleStandaloneDebug -Papk_generator_enabled=true -Psuffix='standalone' -Pdownload='$DOWNLOAD' && jarsigner -verbose -sigalg SHA1withRSA  -digestalg SHA1 -keystore /tmp/keystoreFile.keystore '${standaloneApk}' -storepass '${signingKeystorePassword}' '${signingKeyAlias}'"
                 archiveArtifacts artifacts: 'catroid/build/outputs/apk/**/*.apk', fingerprint: true
             }
         }
