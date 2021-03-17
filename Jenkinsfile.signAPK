@@ -30,7 +30,7 @@ pipeline {
             steps {
                 script {
                     def ret = sh script: "./buildScripts/checkUrlExists.sh '$env.DOWNLOAD'", returnStatus: true
-                    def ret_keystore = sh script: "./buildScripts/checkUrlExists.sh '$env.Signing_keystore_url'", returnStatus: true
+                    def ret_keystore = sh script: "./buildScripts/checkUrlExists.sh '$env.DOWNLOAD'", returnStatus: true
                     if (ret == 200 || ret_keystore == 200) {
                         // Handle special error from the script, if the program download was not
                         // possible because of the HTTP error 528, we set the build to UNSTABLE
