@@ -56,7 +56,7 @@ pipeline {
 				//sh "keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000"
 				sh "keytool -genkey -v -keystore my-release-key.keystore -alias kitty -keyalg RSA -keysize 2048 -validity 10000 -dname 'CN=cName, OU=orgUnit, O=org, L=city, S=state, C=countryCode' -keypass android -storepass android"
 				//sh "./gradlew clean assembleStandaloneDebug -Papk_generator_enabled=true -Psuffix='standalone' -Pdownload='$DOWNLOAD' && jarsigner -verbose -sigalg RSA -digestalg SHA1 -keystore debug.keystore ${standaloneApk} -storepass android -keypass android -alias androiddebugkey"
-				sh "./gradlew clean assembleStandaloneDebug -Papk_generator_enabled=true -Psuffix='standalone' -Pdownload='$DOWNLOAD' && jarsigner -verbose -sigalg RSA -digestalg SHA1 -keystore my-release-key.keystore ${standaloneApk} -storepass android -keypass android 'key0'"
+				sh "./gradlew clean assembleStandaloneDebug -Papk_generator_enabled=true -Psuffix='standalone' -Pdownload='$DOWNLOAD' && jarsigner -verbose -sigalg RSA -digestalg SHA1 -keystore my-release-key.keystore ${standaloneApk} -storepass android -keypass android"
 				//sh "./gradlew clean assembleStandaloneDebug -Papk_generator_enabled=true -Psuffix='standalone' -Pdownload='$DOWNLOAD' && jarsigner -verbose -sigalg RSA -digestalg SHA1 -keystore /tmp/keystoreFile.keystore ${standaloneApk} -storepass ${signingKeystorePassword} 'key0'"
                 archiveArtifacts artifacts: 'catroid/build/outputs/apk/**/*.apk', fingerprint: true
             }
