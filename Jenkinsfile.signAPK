@@ -1,0 +1,89 @@
+#!groovy
+
+def standaloneApk = 'catroid/build/outputs/apk/standalone/debug/catroid-standalone-debug.apk'
+
+pipeline {
+    agent {
+        docker {
+            image 'catrobat/catrobat-android:stable'
+            args '--device /dev/kvm:/dev/kvm -v /var/local/container_shared/gradle_cache/$EXECUTOR_NUMBER:/home/user/.gradle -m=6.5G'
+            label 'Standalone'
+            alwaysPull true
+        }
+    }
+
+    options {
+        timeout(time: 2, unit: 'HOURS')
+        timestamps()
+    }
+
+    stages {
+        stage('Prepare build') {
+            steps {
+                script {
+                    currentBuild.displayName = "${env.DOWNLOAD}"
+                }
+            }
+        }
+
+		stage('Check-for-invalid-program-upload') {
+            steps {
+                script {
+                    def ret = sh script: "./buildScripts/checkUrlExists.sh '$env.DOWNLOAD'", returnStatus: true
+                    def ret_keystore = sh script: "./buildScripts/checkUrlExists.sh '$env.Signing_keystore_url'", returnStatus: true
+                    if (ret == 200 || ret_keystore == 200) {
+                        // Handle special error from the script, if the program download was not
+                        // possible because of the HTTP error 528, we set the build to UNSTABLE
+                        currentBuild.result = 'UNSTABLE'
+                    } else if (ret != 0 || ret_keystore != 0) {
+                        currentBuild.result = 'FAILURE'
+                    }
+                }
+            }
+        }
+		
+        stage('Build signed APK') {
+            // needed, as long as we mark the build unstable when we receive the 528 error from WEB
+            when {
+                expression {
+                    currentBuild.result == null
+                }
+            }
+			
+			steps {
+                // Build, zipalign and sign releasable APK
+				// 1)download keystore to temp folder
+				sh "wget -O /tmp/keystoreFile.keystore 'https:/pr1428-web.catrobat.ist.tugraz.at/download/${Signing_keystore_url}.catrobat'"
+				// 2) or the keystore file is already uploaded to the server
+				//cp '/public/resources/tmp/uploads/$Signing_keystore_url' /tmp/keystoreFile.keystore
+				//sh "keytool -genkey -v -keystore /tmp/keystoreFile.keystore -alias ${signingKeyAlias} -keyalg RSA -keysize 2048 -validity 10000 -dname 'CN=cName, OU=orgUnit, O=org, L=city, S=state, C=countryCode' -keypass ${signingKeystorePassword} -storepass ${signingKeystorePassword}"
+				// build project and sign
+				sh "./gradlew clean assembleStandaloneDebug -Papk_generator_enabled=true -Psuffix='standalone' -Pdownload='$DOWNLOAD' && jarsigner -verbose -sigalg SHA1withRSA  -digestalg SHA1 -keystore /tmp/keystoreFile.keystore '${standaloneApk}' -storepass '${signingKeystorePassword}' '${signingKeyAlias}'"
+                archiveArtifacts artifacts: 'catroid/build/outputs/apk/**/*.apk', fingerprint: true
+            }
+        }
+
+        stage('Upload to Web') {
+            // needed, as long as we mark the build unstable when we receive the 528 error from WEB
+            when {
+                expression {
+                    currentBuild.result == null
+                }
+            }
+
+            steps {
+                script {
+                     sh '''echo would upload now'''
+					 uploadFileToWeb standaloneApk, "${env.UPLOAD}"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // clean workspace
+            deleteDir()
+        }
+    }
+}
