@@ -29,7 +29,7 @@ pipeline {
 		stage('Check-for-invalid-program-upload') {
             steps {
                 script {
-                    def ret = sh script: "./buildScripts/checkUrlExists.sh '$env.DOWNLOAD'", returnStatus: true
+                    def ret = sh script: "./buildScripts/checkUrlExists.sh 'https:/pr1428-web.catrobat.ist.tugraz.at/download/${env.DOWNLOAD}.catrobat'", returnStatus: true
                     def ret_keystore = sh script: "./buildScripts/checkUrlExists.sh '$env.Signing_keystore_url'", returnStatus: true
                     if (ret == 200 || ret_keystore == 200) {
                         // Handle special error from the script, if the program download was not
@@ -53,7 +53,7 @@ pipeline {
 			steps {
                 // Build, zipalign and sign releasable APK
 				// 1)download keystore to temp folder
-				sh "wget -O /tmp/keystoreFile.keystore 'https:/pr1428-web.catrobat.ist.tugraz.at/download/${Signing_keystore_url}.catrobat'"
+				sh "wget -O /tmp/keystoreFile.keystore '${Signing_keystore_url}'"
 				// 2) or the keystore file is already uploaded to the server
 				//cp '/public/resources/tmp/uploads/$Signing_keystore_url' /tmp/keystoreFile.keystore
 				//sh "keytool -genkey -v -keystore /tmp/keystoreFile.keystore -alias ${signingKeyAlias} -keyalg RSA -keysize 2048 -validity 10000 -dname 'CN=cName, OU=orgUnit, O=org, L=city, S=state, C=countryCode' -keypass ${signingKeystorePassword} -storepass ${signingKeystorePassword}"
