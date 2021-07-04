@@ -29,15 +29,15 @@ pipeline {
 		stage('Check-for-invalid-program-upload') {
             steps {
                 script {
-                    def ret = sh script: "./buildScripts/checkUrlExists.sh 'https:/pr1428-web.catrobat.ist.tugraz.at/download/${env.DOWNLOAD}.catrobat'", returnStatus: true
-                    def ret_keystore = sh script: "./buildScripts/checkUrlExists.sh '$env.Signing_keystore_url'", returnStatus: true
-                    if (ret == 200 || ret_keystore == 200) {
-                        // Handle special error from the script, if the program download was not
-                        // possible because of the HTTP error 528, we set the build to UNSTABLE
-                        currentBuild.result = 'UNSTABLE'
-                    } else if (ret != 0 || ret_keystore != 0) {
-                        currentBuild.result = 'FAILURE'
-                    }
+                    def ret = sh script: "./buildScripts/checkUrlExists.sh 'https:/pr1428-web.catrobat.ist.tugraz.at/pocketcode/download/${env.DOWNLOAD}.catrobat'", returnStatus: true
+                    //def ret_keystore = sh script: "./buildScripts/checkUrlExists.sh '$env.Signing_keystore_url'", returnStatus: true
+                    //if (ret == 200 || ret_keystore == 200) {
+                    //    // Handle special error from the script, if the program download was not
+                    //    // possible because of the HTTP error 528, we set the build to UNSTABLE
+                    //    currentBuild.result = 'UNSTABLE'
+                    //} else if (ret != 0 || ret_keystore != 0) {
+                    //    currentBuild.result = 'FAILURE'
+                    //}
                 }
             }
         }
